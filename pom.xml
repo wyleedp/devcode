@@ -9,5 +9,6 @@
 	<modules>
 		<module>devcode-cmd</module>
 		<module>devcode-web</module>
+		<module>devcode-collector</module>
 	</modules>
 </project>
