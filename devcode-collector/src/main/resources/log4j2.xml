@@ -2,10 +2,12 @@
 <Configuration status="INFO">
 	<Properties>
 		<!-- 상세하게 년월일시분초 표시, 패키징명 전체표시 -->
-		<Property name="layoutPattern">[%date{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %logger{35}:%line - %msg%n</Property>
+		<!--<Property name="layoutPattern">[%date{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%equals{%X{requestId}}{}{startup}] %logger{35}:%line - %msg%n</Property>-->
+		<Property name="layoutPattern">[%date{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%equals{%X{requestId}}{}{startup}] %logger{36} - %msg%n</Property>
 		<!-- 간략히 시분초 표시, 패키징/클래스명 줄임 --> 
 		<!--<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] %c{1.}(%file:%line) - %msg%n</Property>-->           
-		<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] %logger{3}:%line - %msg%n</Property>           
+		<!--<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] [%equals{%X{requestId}}{}{startup}] %logger{3}:%line - %msg%n</Property>-->
+		<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] [%equals{%X{requestId}}{}{startup}] %logger{36} - %msg%n</Property>           
 	</Properties>
 	<Appenders>
 		<Console name="console" target="SYSTEM_OUT">

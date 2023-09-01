@@ -44,15 +44,11 @@ public class OsController {
 			  HttpServletRequest request
 		) {
 		
-		String taskId = CommonUtil.getTaskId();
-		String remoteAddr = request.getRemoteAddr();
-		logger.info("[{}] remoteAddr : {}", taskId, remoteAddr);
-		
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while(headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();
 			String headerValue = request.getHeader(headerName);
-			logger.info("[{}] {}={}", taskId, headerName, headerValue);
+			logger.info("{}={}", headerName, headerValue);
 		}
 		
 		return new ResponseEntity(HttpStatus.OK);
@@ -76,8 +72,6 @@ public class OsController {
 			, @RequestParam(name = "systemOsInfoNet", required = false) MultipartFile systemOsInfoNet
 		) {
 		
-		String taskId = CommonUtil.getTaskId();
-		String remoteAddr = request.getRemoteAddr();
 		long systemOsInfoDataSize = -1;
 		long systemOsInfoEnvDataSize = -1;
 		long systemOsInfoDfDataSize = -1;
@@ -103,13 +97,13 @@ public class OsController {
 			systemOsInfoNetDataSize = systemOsInfoNet.getSize();
 		}
 		
-		logger.info("[{}] remoteAddr : {} - systemOsInfoDataSize : {}, systemOsInfoDfDataSize : {}", taskId, remoteAddr, systemOsInfoDataSize, systemOsInfoDfDataSize);
+		logger.info("systemOsInfoDataSize : {}, systemOsInfoDfDataSize : {}", systemOsInfoDataSize, systemOsInfoDfDataSize);
 		
 		try {
 			// 경로 예) C:\Users\wylee\AppData\Local\Temp/devcode/system
 			String devcodeSystemTempDir = SystemUtils.getJavaIoTmpDir() + "/devcode/system";
 			FileUtils.forceMkdir(new File(devcodeSystemTempDir));
-			logger.debug("[{}] TempDir : {}", taskId, devcodeSystemTempDir);
+			logger.debug("TempDir : {}", devcodeSystemTempDir);
 			
 			String sysDateTime = DateFormatUtils.format(new Date(), "yyyyMMddHHmmssSSS");
 			
@@ -123,7 +117,7 @@ public class OsController {
 				systemOsInfo.transferTo(osInfoFile);
 
 				// 파일내용출력
-				logger.debug("[{}] osInfoFileRead - {} \n{}", taskId, osInfoFilePath, FileUtils.readFileToString(osInfoFile, DevcodeCollectorConstant.FILE_ENCODING));
+				logger.debug("osInfoFileRead - {} \n{}", osInfoFilePath, FileUtils.readFileToString(osInfoFile, DevcodeCollectorConstant.FILE_ENCODING));
 			}
 			
 			// OS Info Env
@@ -136,7 +130,7 @@ public class OsController {
 				systemOsInfoEnv.transferTo(file);
 
 				// 파일내용출력
-				logger.debug("[{}] osInfoEnvFileRead - {} \n{}", taskId, filePath, FileUtils.readFileToString(file, DevcodeCollectorConstant.FILE_ENCODING));
+				logger.debug("osInfoEnvFileRead - {} \n{}", filePath, FileUtils.readFileToString(file, DevcodeCollectorConstant.FILE_ENCODING));
 			}
 			
 			// OS Info Df
@@ -149,7 +143,7 @@ public class OsController {
 				systemOsInfoDf.transferTo(file);
 
 				// 파일내용출력
-				logger.debug("[{}] osInfoDfFileRead - {} \n{}", taskId, filePath, FileUtils.readFileToString(file, DevcodeCollectorConstant.FILE_ENCODING));
+				logger.debug("osInfoDfFileRead - {} \n{}", filePath, FileUtils.readFileToString(file, DevcodeCollectorConstant.FILE_ENCODING));
 			}
 			
 			// OS Info Net
@@ -164,7 +158,7 @@ public class OsController {
 				String netReadFile = FileUtils.readFileToString(file, DevcodeCollectorConstant.FILE_ENCODING);
 				
 				// 파일내용출력
-				logger.debug("[{}] osInfoNetFileRead - {} \n{}", taskId, filePath, netReadFile);
+				logger.debug("osInfoNetFileRead - {} \n{}", filePath, netReadFile);
 			}
 		} catch (IOException e) {
 			logger.error(e);
