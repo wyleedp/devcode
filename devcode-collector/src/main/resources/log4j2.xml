@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Properties>
+		<!-- 상세하게 년월일시분초 표시, 패키징명 전체표시 -->
+		<Property name="layoutPattern">[%date{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %logger{35}:%line - %msg%n</Property>
+		<!-- 간략히 시분초 표시, 패키징/클래스명 줄임 --> 
+		<!--<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] %c{1.}(%file:%line) - %msg%n</Property>-->           
+		<Property name="consolePattern">[%date{HH:mm:ss.SSS}] [%-5level] %logger{3}:%line - %msg%n</Property>           
+	</Properties>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="${consolePattern}" />
+		</Console>
+		<RollingFile name="file" fileName="${sys:user.home}/devcode/log/devcode-collector.log" filePattern="${sys:user.home}/devcode/log/devcode-collector_%d{yyyyMMdd}.log">
+			<PatternLayout pattern="${layoutPattern}" />
+			<Policies>
+				<!--<SizeBasedTriggeringPolicy size="100MB" />-->
+				<TimeBasedTriggeringPolicy interval="1" />
+			</Policies>
+			<DefaultRolloverStrategy max="500" fileIndex="min" /> <!-- 롤링 파일 500개 까지 생성 -->
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<!-- 기본 레벨은 info -->
+		<Root level="debug" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="file" />
+		</Root>
+
+		<!-- 다른 기본 패키지도 설정 제어 가능하다. -->
+		<logger name="org.apache.commons.digester" level="info" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="file" />
+		</logger>
+
+		<logger name="org.springframework" additivity="false">
+			<AppenderRef ref="console" level="info" />
+			<AppenderRef ref="file" level="info" />
+		</logger>
+		
+		<logger name="org.mybatis" additivity="false">
+			<AppenderRef ref="console" level="info" />
+			<AppenderRef ref="file" level="info" />
+		</logger>
+
+		<!-- rolling file에는 debug, console에는 info 분리하여 처리 가능하다. -->
+		<logger name="com.github.devcode" additivity="false">
+			<AppenderRef ref="console" level="debug" />
+			<AppenderRef ref="file" level="debug" />
+		</logger>
+	</Loggers>
+	
+</Configuration>
