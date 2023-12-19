@@ -5,6 +5,7 @@ public class AppTreeNode {
 	public static final String DEV_TOOLS_NODE = "DEV_TOOLS_NODE";
 	public static final String JAVA_PROPERTIES_NODE = "JAVA_PROPERTIES_NODE";
 	public static final String OS_ENV_NODE = "OS_ENV_NODE";
+	public static final String UUID_NODE = "UUID_NODE";
 	
 	private String nodeId;
 	private String nodeName;

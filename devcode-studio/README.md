@@ -1,44 +1,8 @@
-Basic Griffon Swing/Java project
---------------------------------
+## devcode-studio
 
-You have just created a basic Griffon application with Swing as UI toolkit
-and Java as main language. The project has the following file structure
+개발을 도와주는 Java Swing 기반의 UI 프로그램
 
-    .
-    ├── build.gradle
-    ├── griffon-app
-    │   ├── conf
-    │   ├── controllers
-    │   ├── i18n
-    │   ├── lifecycle
-    │   ├── models
-    │   ├── resources
-    │   ├── services
-    │   └── views
-    ├── pom.xml
-    └── src
-        ├── integration-test
-        │   └── java
-        ├── main
-        │   ├── java
-        │   └── resources
-        └── test
-            ├── java
-            └── resources
-
-Simply add your source files to `src/main/java`, your test cases to
-`src/test/java` and then you will be able to build your project with
-
-    ./gradlew build
-    ./gradlew test
-    ./gradlew run
-
-Don't forget to add any extra JAR dependencies to `build.gradle`!
-
-If you prefer building with Maven then execute the following commands
-
-    ./mvnw compile
-    ./mvnw test
-    ./mvnw -Prun
-
-Don't forget to add any extra JAR dependencies to `pom.xml`!
+### 기능들
+1. Java Proerties 내용을 조회하는 기능
+2. System.getEnv 내용을 조회하는 기능
+3. UUID 값을 생성하는 기능

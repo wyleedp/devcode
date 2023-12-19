@@ -48,6 +48,12 @@
 			<artifactId>jsvg</artifactId>
 			<version>1.3.0</version>
 		</dependency>
+		<!-- https://www.formdev.com/jformdesigner/doc/layouts/miglayout/, https://github.com/mikaelgrev/miglayout -->
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
+			<version>11.2</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>

@@ -35,6 +35,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.github.devcode.studio.component.AppTreeNode;
 import com.github.devcode.studio.panel.JavaPropertiesPanel;
 import com.github.devcode.studio.panel.OsEnvPanel;
+import com.github.devcode.studio.panel.UuidPanel;
 
 /**
  * devcode-studio
@@ -136,8 +137,12 @@ public class DevcodeStudioLauncher extends JFrame {
 		DefaultMutableTreeNode osEnvTreeNode = new DefaultMutableTreeNode("OS Env");
 		osEnvTreeNode.setUserObject(new AppTreeNode(AppTreeNode.OS_ENV_NODE, "OS Env"));
 		
+		DefaultMutableTreeNode uuidNode = new DefaultMutableTreeNode("UUID");
+		uuidNode.setUserObject(new AppTreeNode(AppTreeNode.UUID_NODE, "UUID"));
+		
 		devTooltreeNode.add(javaPropertiesTreeNode);
 		devTooltreeNode.add(osEnvTreeNode);
+		devTooltreeNode.add(uuidNode);
 		
 		JTree devTooltree = new JTree(devTooltreeNode);
 		devTooltree.addMouseListener(new MouseAdapter() {
@@ -208,6 +213,9 @@ public class DevcodeStudioLauncher extends JFrame {
 		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.OS_ENV_NODE)) {
 			bodyTabPane.addTab(nodeName, new OsEnvPanel());
 			setTabFocus();
+		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.UUID_NODE)) {
+			bodyTabPane.addTab(nodeName, new UuidPanel());
+			setTabFocus();
 		}
 	}
 	
@@ -227,13 +235,17 @@ public class DevcodeStudioLauncher extends JFrame {
 	 * 실행 
 	 */
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                final DevcodeStudioLauncher studio = new DevcodeStudioLauncher();
-                studio.setVisible(true);
-            }
-        });
+		try {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	                final DevcodeStudioLauncher studio = new DevcodeStudioLauncher();
+	                studio.setVisible(true);
+	            }
+	        });
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
