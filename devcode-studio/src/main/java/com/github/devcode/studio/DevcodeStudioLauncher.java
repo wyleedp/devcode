@@ -11,6 +11,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.function.BiConsumer;
 
 import javax.swing.JFrame;
@@ -28,7 +33,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -48,53 +56,185 @@ public class DevcodeStudioLauncher extends JFrame {
 	private JPanel rightPanel;
 	private JTabbedPane bodyTabPane;
 	
+	/**
+	 * 예) C:/Users/wylee/devcode/devcode-studio
+	 */
+	private static final String APP_HOME = FilenameUtils.normalizeNoEndSeparator(SystemUtils.USER_HOME + "/devcode/devcode-studio", true);
+	
+	private static final String APP_CONF_DIR = APP_HOME + "/conf";
+	private static final String APP_CONF_FILE = APP_HOME + "/conf/devcode-studio.conf";
+	
+	private static final String APP_LOG_DIR = APP_HOME + "/log";
+	
+	private static Properties appConfigurationProp = new Properties();
+	private static final int WINDOW_WIDTH_DEFAULT_SIZE = 1000;
+	private static final int WINDOW_HEIGHT_DEFAULT_SIZE = 800;
+	
+	private int windowWidthSize = 1000;
+	private int windowHeightSize = 800;
+	
+	/**
+	 * 최초 구성
+	 */
 	public DevcodeStudioLauncher() {
 		setTitle("devcode-studio");
-
-		// FlatLaf - Flat Look and Feel 적용
-		// 기본 테마
-		FlatLightLaf.setup();
 		
-		// 다크 테마
-		//FlatArcDarkIJTheme.setup();
-		
-		//FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
-		//FlatLightLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
-		
-		// 종료 이벤트
-		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				DevcodeStudioLauncher.this.windowClosing();
+		try {
+			// 앱 설정
+			File appHomeFile = new File(APP_HOME);
+			File appConfDir = new File(APP_CONF_DIR);
+			File appLogDir = new File(APP_LOG_DIR);
+			
+			if(!appHomeFile.exists()) FileUtils.forceMkdirParent(appHomeFile);
+			if(!appConfDir.exists()) FileUtils.forceMkdirParent(appConfDir);
+			if(!appLogDir.exists()) FileUtils.forceMkdirParent(appLogDir);
+			
+			// window.width.size=1000
+			// window.height.size=800
+			File appConfFile = new File(APP_CONF_FILE);
+			if(!appConfFile.exists()) {
+				StringBuilder confBuilder = new StringBuilder();
+				confBuilder.append("window.width.size=").append(WINDOW_WIDTH_DEFAULT_SIZE).append(System.lineSeparator());
+				confBuilder.append("window.height.size=").append(WINDOW_HEIGHT_DEFAULT_SIZE);
+				FileUtils.writeStringToFile(appConfFile, confBuilder.toString(), "UTF-8");
+				
+				System.out.println("Configuration File Created. Path : " + appConfFile.toString());
+				
+				windowWidthSize = WINDOW_WIDTH_DEFAULT_SIZE;
+				windowHeightSize = WINDOW_HEIGHT_DEFAULT_SIZE;
 			}
-		});
+			
+			appConfigurationProp.load(new FileInputStream(appConfFile));
+			
+			Object windowWidthSizeObject = appConfigurationProp.get("window.width.size");
+			Object windowHeightSizeObject = appConfigurationProp.get("window.height.size");
+			
+			if(windowWidthSizeObject != null) windowWidthSize = Integer.parseInt(windowWidthSizeObject.toString());
+			if(windowHeightSizeObject != null) windowHeightSize = Integer.parseInt(windowHeightSizeObject.toString());
+				
+			// TODO : 로깅설정
+			
+			
+			
+			// FlatLaf - Flat Look and Feel 적용
+			// 기본 테마
+			FlatLightLaf.setup();
+			
+			// 다크 테마
+			//FlatArcDarkIJTheme.setup();
+			
+			//FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+			//FlatLightLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+			
+			// 창 크기 조정 이벤트
+//			addComponentListener(new ComponentAdapter() {
+//				@Override
+//				public void componentResized(ComponentEvent e) {
+//					JFrame frame = (JFrame)e.getSource();
+//					super.componentResized(e);
+//					
+//					System.out.println("Resize");
+//					System.out.println("Width : " + frame.getSize().getWidth());
+//					System.out.println("Height : " + frame.getSize().getHeight());
+//				}
+//			});
+			
+			// 종료 이벤트
+			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+			addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					DevcodeStudioLauncher.this.windowClosing();
+				}
+			});
+			
+			// 사이즈 지정 및 가운데 표시
+			setSize(windowWidthSize, windowHeightSize);
+			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+	        Dimension frm = this.getSize();
+	        int xpos = (int)(screen.getWidth() / 2 - frm.getWidth() / 2);
+	        int ypos = (int)(screen.getHeight() / 2 - frm.getHeight() / 2);
+	        setLocation(xpos, ypos);
+
+			initComponent();
+
+			setVisible(true);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
-		// 사이즈 지정 및 가운데 표시
-		setSize(1000, 800);
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension frm = this.getSize();
-        int xpos = (int)(screen.getWidth() / 2 - frm.getWidth() / 2);
-        int ypos = (int)(screen.getHeight() / 2 - frm.getHeight() / 2);
-        setLocation(xpos, ypos);
-
-		initComponent();
-
-		setVisible(true);
 	}
 	
 	/**
 	 * 종료
 	 */
-	public void windowClosing() {
+	private void windowClosing() {
 		int confirm = JOptionPane.showConfirmDialog(this, "종료하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
 		if(confirm == JOptionPane.YES_OPTION) {
 			System.out.println("종료");
+			
+			// 창 크기 저장
+			Dimension size = getSize();
+			setAppConfiguration("window.width.size", (int)size.getWidth());
+			setAppConfiguration("window.height.size", (int)size.getHeight());
+			
 			DevcodeStudioLauncher.this.setVisible(false);
 			DevcodeStudioLauncher.this.dispose();
 		}
 	}
 	
+	/**
+	 * App 설정값 저장
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	private void setAppConfiguration(String key, String value) {
+		if(appConfigurationProp == null) {
+			return;
+		}
+		
+		if(StringUtils.isBlank(key)) {
+			System.out.println("Required key value!!!");
+			return;
+		}
+		
+		boolean isNotMatch = true;
+		String[] keys = new String[] {"window.width.size", "window.height.size"};
+		for(String keyValue : keys) {
+			if(StringUtils.equals(key, keyValue)) {
+				isNotMatch = false;
+			}
+		}
+		
+		if(isNotMatch) {
+			System.out.println("Not Support Key. Key : " + key);
+			return;
+		}
+		
+		try {
+			appConfigurationProp.setProperty(key, value);
+			
+			// TODO : [2023.12.22] 현재 프로퍼티 저장시 # 등록일시가 기록됨. 처리필요, 구글링해본결과 Properties 상속받아서 재정의 해야 할듯..
+			appConfigurationProp.store(new FileWriter(new File(APP_CONF_FILE)), "");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	/**
+	 * App 설정값 저장
+	 * 
+	 * @param key
+	 * @param intValue
+	 */
+	private void setAppConfiguration(String key, int intValue) {
+		setAppConfiguration(key, Integer.toString(intValue));
+	}
+	
+	/**
+	 * 컴포넌트 초기구성
+	 */
 	private void initComponent() {
 		// 메뉴 구성
 		Container contentPane = getContentPane();

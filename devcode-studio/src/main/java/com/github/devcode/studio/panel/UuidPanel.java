@@ -21,6 +21,7 @@ import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import net.miginfocom.swing.MigLayout;
@@ -41,13 +42,16 @@ public class UuidPanel extends JPanel {
 	private JPanel viewPanel = new JPanel();
 	
 	private JSpinner createCountSpinner = new JSpinner();
+	private JButton createUuidButton = new JButton("생성");
 	private JTextArea uuidTextArea = new JTextArea("");
 	
 	private JPanel statusPanel = new JPanel(new BorderLayout());
 	private JLabel statusInformLabel = new JLabel("");
 	
-	
-	
+	/**
+	 * UUID 생성 기본값
+	 */
+	private static final int UUID_CREATE_DEFAULT_VALUE = 10;
 	
 	public UuidPanel() {
 		setLayout(new BorderLayout());
@@ -69,18 +73,20 @@ public class UuidPanel extends JPanel {
 		createCountConfigLabel.setPreferredSize(new Dimension(150, 0));
 		
 		// 생성수 값지정(초기값:10, 최소:1, 최대:100, 증감값:1)
-		SpinnerNumberModel numberModel = new SpinnerNumberModel(10, 1, 100, 1); 
+		SpinnerNumberModel numberModel = new SpinnerNumberModel(UUID_CREATE_DEFAULT_VALUE, 1, 100, 1);
 		createCountSpinner.setModel(numberModel);
 		
 		configPanel.setLayout(new MigLayout("", "[][][][][]", "[]"));
 		configPanel.add(createCountConfigLabel, "cell 1 0");
 		configPanel.add(createCountSpinner, "cell 2 0,growx");
 		
-		JButton createUuidButton = new JButton("생성");
+		// UUID 생성
 		createUuidButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				createUuidButton.setEnabled(false);
 				setCreateUuidTextArea();
+				createUuidButton.setEnabled(true);
 			}
 		});
 		buttonGroupPanel.add(createUuidButton);
@@ -107,7 +113,16 @@ public class UuidPanel extends JPanel {
 	 * UUID 생성 후 uuidTextArea 값지정
 	 */
 	public void setCreateUuidTextArea() {
-		int createCount = (int)createCountSpinner.getValue();
+		String createCountValue = createCountSpinner.getValue().toString();
+		int createCount = UUID_CREATE_DEFAULT_VALUE;
+		
+		if(StringUtils.isNotBlank(createCountValue) && StringUtils.isNumeric(createCountValue)) {
+			createCount = Integer.parseInt(createCountValue);
+			if(createCount < 0 && createCount > 100) {
+				createCount = UUID_CREATE_DEFAULT_VALUE;
+			}
+		}
+		
 		if(createCount > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(int i=0; i<createCount; i++) {
@@ -119,7 +134,7 @@ public class UuidPanel extends JPanel {
 			}
 		
 			uuidTextArea.setText(sb.toString());
-			statusInformLabel.setText(createCount + "개의 UUID가 생성이 완료되었습니다. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			statusInformLabel.setText(createCount + "개의 UUID 생성완료. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		}
 	}
 	
@@ -137,6 +152,4 @@ public class UuidPanel extends JPanel {
         panel.add(c);
     }
 	
-	
-
 }
