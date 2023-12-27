@@ -48,7 +48,13 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
+/**
+ * 파일목록 JTable 예제
+ */
 public final class TableFileListExample extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
+
 	private TableFileListExample() {
 		super(new BorderLayout());
 

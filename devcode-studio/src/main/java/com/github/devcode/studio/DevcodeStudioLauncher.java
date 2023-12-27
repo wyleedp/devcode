@@ -37,6 +37,17 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -65,6 +76,7 @@ public class DevcodeStudioLauncher extends JFrame {
 	private static final String APP_CONF_FILE = APP_HOME + "/conf/devcode-studio.conf";
 	
 	private static final String APP_LOG_DIR = APP_HOME + "/log";
+	private static final String APP_LOG_FILE = APP_HOME + "/log/devcode-studio.log";
 	
 	private static Properties appConfigurationProp = new Properties();
 	private static final int WINDOW_WIDTH_DEFAULT_SIZE = 1000;
@@ -73,14 +85,13 @@ public class DevcodeStudioLauncher extends JFrame {
 	private int windowWidthSize = 1000;
 	private int windowHeightSize = 800;
 	
+	private static Logger logger;
+	
 	/**
-	 * 최초 구성
+	 * 앱 설정정보
 	 */
-	public DevcodeStudioLauncher() {
-		setTitle("devcode-studio");
-		
+	private void setAppConfiguration() {
 		try {
-			// 앱 설정
 			File appHomeFile = new File(APP_HOME);
 			File appConfDir = new File(APP_CONF_DIR);
 			File appLogDir = new File(APP_LOG_DIR);
@@ -98,7 +109,7 @@ public class DevcodeStudioLauncher extends JFrame {
 				confBuilder.append("window.height.size=").append(WINDOW_HEIGHT_DEFAULT_SIZE);
 				FileUtils.writeStringToFile(appConfFile, confBuilder.toString(), "UTF-8");
 				
-				System.out.println("Configuration File Created. Path : " + appConfFile.toString());
+				logger.info("Configuration File Created. Path : " + appConfFile.toString());
 				
 				windowWidthSize = WINDOW_WIDTH_DEFAULT_SIZE;
 				windowHeightSize = WINDOW_HEIGHT_DEFAULT_SIZE;
@@ -109,60 +120,66 @@ public class DevcodeStudioLauncher extends JFrame {
 			Object windowWidthSizeObject = appConfigurationProp.get("window.width.size");
 			Object windowHeightSizeObject = appConfigurationProp.get("window.height.size");
 			
-			if(windowWidthSizeObject != null) windowWidthSize = Integer.parseInt(windowWidthSizeObject.toString());
-			if(windowHeightSizeObject != null) windowHeightSize = Integer.parseInt(windowHeightSizeObject.toString());
-				
-			// TODO : 로깅설정
+			if(windowWidthSizeObject != null) {
+				windowWidthSize = Integer.parseInt(windowWidthSizeObject.toString());
+			}
 			
+			if(windowHeightSizeObject != null) {
+				windowHeightSize = Integer.parseInt(windowHeightSizeObject.toString());
+			}
 			
-			
-			// FlatLaf - Flat Look and Feel 적용
-			// 기본 테마
-			FlatLightLaf.setup();
-			
-			// 다크 테마
-			//FlatArcDarkIJTheme.setup();
-			
-			//FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
-			//FlatLightLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
-			
-			// 창 크기 조정 이벤트
-//			addComponentListener(new ComponentAdapter() {
-//				@Override
-//				public void componentResized(ComponentEvent e) {
-//					JFrame frame = (JFrame)e.getSource();
-//					super.componentResized(e);
-//					
-//					System.out.println("Resize");
-//					System.out.println("Width : " + frame.getSize().getWidth());
-//					System.out.println("Height : " + frame.getSize().getHeight());
-//				}
-//			});
-			
-			// 종료 이벤트
-			setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-			addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosing(WindowEvent e) {
-					DevcodeStudioLauncher.this.windowClosing();
-				}
-			});
-			
-			// 사이즈 지정 및 가운데 표시
-			setSize(windowWidthSize, windowHeightSize);
-			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-	        Dimension frm = this.getSize();
-	        int xpos = (int)(screen.getWidth() / 2 - frm.getWidth() / 2);
-	        int ypos = (int)(screen.getHeight() / 2 - frm.getHeight() / 2);
-	        setLocation(xpos, ypos);
+			// Log4j2를 이용한 로깅
+			ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+			builder.setStatusLevel(Level.INFO);
+			builder.setConfigurationName("BuilderTest");
+			builder.add(builder.newFilter("ThresholdFilter", Filter.Result.ACCEPT, Filter.Result.NEUTRAL).addAttribute("level", Level.DEBUG));
 
-			initComponent();
+			ComponentBuilder<?> triggeringPolicy = builder.newComponent("Policies")
+			        .addComponent(builder.newComponent("CronTriggeringPolicy").addAttribute("schedule", "0 0 0 * * ?"))
+			        .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "100M"));
+			
+			// 콘솔
+			AppenderComponentBuilder consoleAppenderBuilder = builder.newAppender("Stdout", "CONSOLE")
+					.addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT)
+			        .add(builder.newLayout("PatternLayout").addAttribute("pattern", "[%d{HH:mm:ss,SSS}] [%t] [%-5level] %c(%M:%L)] - %m%n"))
+			        .add(builder.newFilter("MarkerFilter", Filter.Result.DENY, Filter.Result.NEUTRAL).addAttribute("marker", "FLOW"));
+			
+			// 파일
+			AppenderComponentBuilder rollingAppenderBuilder = builder.newAppender("rolling", "RollingFile")
+					.add(builder.newLayout("PatternLayout").addAttribute("pattern", "[%d] [%t] [%-5level] %c(%M:%L)] - %m%n"))
+					.addAttribute("fileName", APP_LOG_FILE)
+					.addAttribute("filePattern", APP_LOG_DIR + "/devcode-studio_%d{yyyy-MM-dd}.log")
+					.addComponent(triggeringPolicy);
+			
+			builder.add(consoleAppenderBuilder);
+			builder.add(rollingAppenderBuilder);
+			
+			builder.add(builder.newRootLogger(Level.INFO)
+					.add(builder.newAppenderRef("Stdout"))
+					.add(builder.newAppenderRef("rolling"))
+					.addAttribute("additivity", false));
 
-			setVisible(true);
-		} catch (IOException e) {
+			builder.add(builder.newLogger("com.github.devcode.studio", Level.INFO)
+					.add(builder.newAppenderRef("Stdout"))
+					.add(builder.newAppenderRef("rolling"))
+					.addAttribute("additivity", false));
+			
+			Configurator.initialize(builder.build());
+			
+			logger = LogManager.getLogger(DevcodeStudioLauncher.class);
+			
+		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+	}
+	
+	/**
+	 * 최초 구성
+	 */
+	public DevcodeStudioLauncher() {
+		setTitle("devcode-studio");
+		setAppConfiguration();
+		initComponent();
 	}
 	
 	/**
@@ -171,7 +188,7 @@ public class DevcodeStudioLauncher extends JFrame {
 	private void windowClosing() {
 		int confirm = JOptionPane.showConfirmDialog(this, "종료하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
 		if(confirm == JOptionPane.YES_OPTION) {
-			System.out.println("종료");
+			logger.info("Closing...");
 			
 			// 창 크기 저장
 			Dimension size = getSize();
@@ -215,7 +232,7 @@ public class DevcodeStudioLauncher extends JFrame {
 		try {
 			appConfigurationProp.setProperty(key, value);
 			
-			// TODO : [2023.12.22] 현재 프로퍼티 저장시 # 등록일시가 기록됨. 처리필요, 구글링해본결과 Properties 상속받아서 재정의 해야 할듯..
+			// TODO : [2023.12.22] 현재 프로퍼티 저장시 # 등록일시가 기록됨. 처리필요, 구글링해본결과 해제 옵션이 없는듯. Properties 상속받아서 재정의 해야 할듯..
 			appConfigurationProp.store(new FileWriter(new File(APP_CONF_FILE)), "");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -236,6 +253,35 @@ public class DevcodeStudioLauncher extends JFrame {
 	 * 컴포넌트 초기구성
 	 */
 	private void initComponent() {
+		logger.info("컴포넌트 생성");
+		
+		// FlatLaf - Flat Look and Feel 적용
+		// 기본 테마
+		FlatLightLaf.setup();
+		
+		// 다크 테마
+		//FlatArcDarkIJTheme.setup();
+		
+		//FlatLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+		//FlatLightLaf.setPreferredMonospacedFontFamily(FlatJetBrainsMonoFont.FAMILY);
+		
+		// 종료 이벤트
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				DevcodeStudioLauncher.this.windowClosing();
+			}
+		});
+		
+		// 사이즈 지정 및 가운데 표시
+		setSize(windowWidthSize, windowHeightSize);
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        Dimension frm = this.getSize();
+        int xpos = (int)(screen.getWidth() / 2 - frm.getWidth() / 2);
+        int ypos = (int)(screen.getHeight() / 2 - frm.getHeight() / 2);
+        setLocation(xpos, ypos);
+		
 		// 메뉴 구성
 		Container contentPane = getContentPane();
 		JMenuBar menuBar = new JMenuBar();
@@ -294,8 +340,6 @@ public class DevcodeStudioLauncher extends JFrame {
 						return;
 					}
 					
-					System.out.println("더블클릭 : " + dblclickTreeNode.toString());
-					
 					AppTreeNode appTreeNode = (AppTreeNode)dblclickTreeNode.getUserObject();
 					
 					// 기능탭 추가
@@ -332,6 +376,8 @@ public class DevcodeStudioLauncher extends JFrame {
 		
 		mainPanel.add(bodySplitPane);
         contentPane.add(mainPanel);
+        
+        setVisible(true);
 	}
 	
 	/**
@@ -343,9 +389,7 @@ public class DevcodeStudioLauncher extends JFrame {
 		String nodeId = appTreeNode.getNodeId();
 		String nodeName = appTreeNode.getNodeName();
 		
-		System.out.println("탭 생성 functionId : " + nodeId);
-		int tabCount = bodyTabPane.getTabCount();
-		System.out.println("tabCount : " + tabCount);
+		logger.info("탭 생성. NodeId : " + nodeId);
 		
 		if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.JAVA_PROPERTIES_NODE)) {
 			bodyTabPane.addTab(nodeName, new JavaPropertiesPanel());	

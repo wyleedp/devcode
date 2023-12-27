@@ -21,6 +21,8 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import com.formdev.flatlaf.extras.components.FlatButton;
@@ -32,6 +34,8 @@ import com.formdev.flatlaf.extras.components.FlatButton.ButtonType;
 public class OsEnvPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static Logger logger = LogManager.getLogger(OsEnvPanel.class);
 
 	private JTable table;
 	private DefaultTableModel tableModel; 
@@ -72,7 +76,7 @@ public class OsEnvPanel extends JPanel {
 		int width0 = Math.round(tablePreferredSize.width * 0.1f);
 		int width1 = Math.round(tablePreferredSize.width * 0.3f);
 		int width2 = Math.round(tablePreferredSize.width * 0.6f);
-		System.out.println("tableSize : " + tablePreferredSize + ", width : " + width0 + ", " + width1 + ", " + width2);
+		logger.info("TableSize : " + tablePreferredSize + ", width : " + width0 + ", " + width1 + ", " + width2);
 		
 		columnModel.getColumn(0).setPreferredWidth(width0);
 		columnModel.getColumn(0).setMinWidth(width0);

@@ -8,6 +8,9 @@ import javax.swing.*;
  * 탭영역에서 팝업메뉴 표시하여 탭추가, 탭 전체를 닫을 수 있는 예제
  */
 public final class TabbedPaneDefaultPanel extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
+
 	private TabbedPaneDefaultPanel() {
 		super(new BorderLayout());
 		JTabbedPane tabbedPane = new JTabbedPane();
@@ -40,6 +43,9 @@ public final class TabbedPaneDefaultPanel extends JPanel {
 }
 
 final class TabbedPanePopupMenu extends JPopupMenu {
+
+	private static final long serialVersionUID = 1L;
+	
 	private final JMenuItem closePage;
 	private final JMenuItem closeAll;
 	private final JMenuItem closeAllButActive;
@@ -87,4 +93,5 @@ final class TabbedPanePopupMenu extends JPopupMenu {
 			super.show(c, x, y);
 		}
 	}
+	
 }

@@ -12,13 +12,18 @@ import javax.swing.JToggleButton;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
+/**
+ * JButton 예제
+ */
 public class JButtonExample extends JFrame {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	public JButtonExample() {
 		super("버튼 테스트");
-		
+
 		FlatLightLaf.setup();
-		
+
 		// 버튼을 넣기위한 패널 생성
 		JPanel buttonPanel = new JPanel();
 		// 'Button'이름을 가진 버튼 생성

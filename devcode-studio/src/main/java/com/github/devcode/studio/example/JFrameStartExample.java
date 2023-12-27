@@ -6,6 +6,9 @@ import javax.swing.JFrame;
 import javax.swing.JTable;
 import java.awt.BorderLayout;
 
+/**
+ * JFrame 시작 예제
+ */
 public class JFrameStartExample {
 
 	private JFrame frame;

@@ -23,6 +23,8 @@ import javax.swing.SwingConstants;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -33,6 +35,8 @@ public class UuidPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
+	private static Logger logger = LogManager.getLogger(OsEnvPanel.class);
+	
 	private JPanel titlePanel = new JPanel(new BorderLayout());
 	private JLabel titleLabel = new JLabel("UUID");
 	
@@ -114,18 +118,18 @@ public class UuidPanel extends JPanel {
 	 */
 	public void setCreateUuidTextArea() {
 		String createCountValue = createCountSpinner.getValue().toString();
-		int createCount = UUID_CREATE_DEFAULT_VALUE;
+		int uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
 		
 		if(StringUtils.isNotBlank(createCountValue) && StringUtils.isNumeric(createCountValue)) {
-			createCount = Integer.parseInt(createCountValue);
-			if(createCount < 0 && createCount > 100) {
-				createCount = UUID_CREATE_DEFAULT_VALUE;
+			uuidCreateCount = Integer.parseInt(createCountValue);
+			if(uuidCreateCount < 0 && uuidCreateCount > 100) {
+				uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
 			}
 		}
 		
-		if(createCount > 0) {
+		if(uuidCreateCount > 0) {
 			StringBuilder sb = new StringBuilder();
-			for(int i=0; i<createCount; i++) {
+			for(int i=0; i<uuidCreateCount; i++) {
 				if(i > 0) {
 					sb.append(System.lineSeparator());
 				}
@@ -133,8 +137,10 @@ public class UuidPanel extends JPanel {
 				sb.append(UUID.randomUUID().toString().toUpperCase());
 			}
 		
+			logger.info("UUID {}개 생성", uuidCreateCount);
+			
 			uuidTextArea.setText(sb.toString());
-			statusInformLabel.setText(createCount + "개의 UUID 생성완료. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			statusInformLabel.setText(uuidCreateCount + "개의 UUID 생성완료. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		}
 	}
 	
@@ -143,10 +149,10 @@ public class UuidPanel extends JPanel {
         gbc.fill= fillConstraints; //GridBagConstraints.BOTH;
         gbc.gridx = x;
         gbc.gridy = y;
-        //gbc.gridwidth = w;
-        //gbc.gridheight = h;
-        gbc.weightx = w;      // 비율로 영역분해
-        gbc.weighty = h;      // 비율로 영역분해
+        //gbc.gridwidth = w;  // 크기
+        //gbc.gridheight = h; // 크기
+        gbc.weightx = w;      // 비율
+        gbc.weighty = h;      // 비율
         
         gridBagLayout.setConstraints (c,gbc);
         panel.add(c);
