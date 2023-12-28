@@ -2,10 +2,11 @@
 개발을 도와주는 Java Swing 기반의 UI 프로그램
 
 
-### 기능들
+### 기능
 1. Java Proerties 내용을 조회하는 기능
 2. System.getEnv 내용을 조회하는 기능
-3. UUID 값을 생성하는 기능
+3. UUID 문자열 생성기능
+4. 랜덤 문자열 생성기능
 
 
 ### 개발환경
@@ -31,6 +32,6 @@ OS Environment
 
 ![Java Properties](./doc/image/02_OsEnvironment.jpg)
 
-UUID 생성
+UUID 문자열 생성
 
 ![Java Properties](./doc/image/03_UUID.jpg)

@@ -54,6 +54,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.github.devcode.studio.component.AppTreeNode;
 import com.github.devcode.studio.panel.JavaPropertiesPanel;
 import com.github.devcode.studio.panel.OsEnvPanel;
+import com.github.devcode.studio.panel.RandomStringPanel;
 import com.github.devcode.studio.panel.UuidPanel;
 
 /**
@@ -177,9 +178,14 @@ public class DevcodeStudioLauncher extends JFrame {
 	 * 최초 구성
 	 */
 	public DevcodeStudioLauncher() {
-		setTitle("devcode-studio");
-		setAppConfiguration();
-		initComponent();
+		try {
+			setTitle("devcode-studio");
+			setAppConfiguration();
+			initComponent();
+		}catch(Exception e) {
+			logger.error("ERROR", e);
+			JOptionPane.showMessageDialog(getRootPane(), e.getMessage(), "확인", JOptionPane.WARNING_MESSAGE);
+		}
 	}
 	
 	/**
@@ -197,6 +203,8 @@ public class DevcodeStudioLauncher extends JFrame {
 			
 			DevcodeStudioLauncher.this.setVisible(false);
 			DevcodeStudioLauncher.this.dispose();
+			
+			logger.info("Close Complete.");
 		}
 	}
 	
@@ -326,9 +334,13 @@ public class DevcodeStudioLauncher extends JFrame {
 		DefaultMutableTreeNode uuidNode = new DefaultMutableTreeNode("UUID");
 		uuidNode.setUserObject(new AppTreeNode(AppTreeNode.UUID_NODE, "UUID"));
 		
+		DefaultMutableTreeNode randomStringNode = new DefaultMutableTreeNode("Random String");
+		randomStringNode.setUserObject(new AppTreeNode(AppTreeNode.RANDOM_STRING_NODE, "Random String"));
+		
 		devTooltreeNode.add(javaPropertiesTreeNode);
 		devTooltreeNode.add(osEnvTreeNode);
 		devTooltreeNode.add(uuidNode);
+		devTooltreeNode.add(randomStringNode);
 		
 		JTree devTooltree = new JTree(devTooltreeNode);
 		devTooltree.addMouseListener(new MouseAdapter() {
@@ -400,6 +412,9 @@ public class DevcodeStudioLauncher extends JFrame {
 		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.UUID_NODE)) {
 			bodyTabPane.addTab(nodeName, new UuidPanel());
 			setTabFocus();
+		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.RANDOM_STRING_NODE)) {
+			bodyTabPane.addTab(nodeName, new RandomStringPanel());
+			setTabFocus();
 		}
 	}
 	
@@ -428,8 +443,10 @@ public class DevcodeStudioLauncher extends JFrame {
 	            }
 	        });
 		}catch(Exception e) {
+			System.err.println("ERROR");
 			e.printStackTrace();
 		}
 	}
+	
 	
 }

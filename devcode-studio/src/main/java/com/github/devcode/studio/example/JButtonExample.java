@@ -33,7 +33,7 @@ public class JButtonExample extends JFrame {
 
 		// 버튼안에 이미지 넣기
 		ImageIcon icon1 = new ImageIcon(".\\src\\red.png");
-		ImageIcon icon2 = new ImageIcon(".\\src\\black.png");
+		//ImageIcon icon2 = new ImageIcon(".\\src\\black.png");
 		JToggleButton tgbutton = new JToggleButton(icon1);
 		buttonPanel.add(tgbutton);
 

@@ -19,3 +19,6 @@
 * 목표
   - 리눅스의 기본정보 및 리소스 정보를 쉘스크립트 기반으로 가볍게 실행되는 에이전트로 개발
   - curl 명령어로 collector 실행
+  
+### devcode-studio
+* 개발을 도와주는 Java Swing 기반의 UI 프로그램

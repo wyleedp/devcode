@@ -52,6 +52,8 @@ public class UuidPanel extends JPanel {
 	private JPanel statusPanel = new JPanel(new BorderLayout());
 	private JLabel statusInformLabel = new JLabel("");
 	
+	//private JProgressBar progressBar = new JProgressBar();
+	
 	/**
 	 * UUID 생성 기본값
 	 */
@@ -116,7 +118,7 @@ public class UuidPanel extends JPanel {
 	/**
 	 * UUID 생성 후 uuidTextArea 값지정
 	 */
-	public void setCreateUuidTextArea() {
+	private void setCreateUuidTextArea() {
 		String createCountValue = createCountSpinner.getValue().toString();
 		int uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
 		
@@ -144,7 +146,7 @@ public class UuidPanel extends JPanel {
 		}
 	}
 	
-	public void gridBagAdd(GridBagLayout gridBagLayout, JPanel panel, Component c, int fillConstraints, int x, int y, int w, int h){
+	private void gridBagAdd(GridBagLayout gridBagLayout, JPanel panel, Component c, int fillConstraints, int x, int y, int w, int h){
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill= fillConstraints; //GridBagConstraints.BOTH;
         gbc.gridx = x;
