@@ -23,7 +23,7 @@ java -jar target\devcode-studio.jar
 ```
 
 
-### 예제
+### 스크린샷
 Java Proerties
 
 ![Java Properties](./doc/image/01_JavaProerties.jpg)
@@ -35,3 +35,11 @@ OS Environment
 UUID 문자열 생성
 
 ![Java Properties](./doc/image/03_UUID.jpg)
+
+
+### 사용한 오픈소스
+* [FlatLaf](https://github.com/JFormDesigner/FlatLaf) - Swing Look and Feel
+* [MigLayout](https://github.com/JFormDesigner/miglayout) - Swing Layout
+* [Apache Common IO](https://github.com/apache/commons-io)
+* [Apache Common Lang](https://github.com/apache/commons-lang)
+* [Apache Logging log4j2](https://github.com/apache/logging-log4j2)
