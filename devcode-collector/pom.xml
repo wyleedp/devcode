@@ -5,6 +5,7 @@
 		<artifactId>devcode</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
+	<version>0.0.1</version>
 	<artifactId>devcode-collector</artifactId>
 	<packaging>war</packaging>
 
@@ -85,11 +86,6 @@
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.1</version>
-			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

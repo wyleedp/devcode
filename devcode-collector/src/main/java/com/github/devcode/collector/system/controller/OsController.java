@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.devcode.collector.DevcodeCollectorConstant;
-import com.github.devcode.collector.common.util.CommonUtil;
 
 /**
  * OS의 정보 및 리소스를 수집하는 Controller 
@@ -178,14 +177,6 @@ public class OsController {
 		logger.info("p : {}", p);
 		
 		return "ok";
-	}
-	
-	public static void main(String[] args) {
-		String test = "enp0s3: 48992408  772696    0    0    0     0          0         0 85179266  741592    0    0    0     0       0          0";
-		String[] arr = StringUtils.splitByWholeSeparator(test, null);
-		for(String value : arr) {
-			System.out.println("value : " + value);
-		}
 	}
 	
 }
