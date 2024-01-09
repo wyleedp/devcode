@@ -6,15 +6,16 @@
 * 통합게시판
 * 메모
 * 메뉴
+* 로그인
 * SQL Server, MariadDB, Postgresql 지원
+
 
 ### 기능
 * 목표만 세워 놓음.
 
 
 ### 개발환경
-* JDK 11
-* Maven 3.8
+* JDK 11 / Maven 3.8
 * SpringBoot 2.7.7
 
 
