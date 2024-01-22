@@ -7,6 +7,7 @@ public class AppTreeNode {
 	public static final String OS_ENV_NODE = "OS_ENV_NODE";
 	public static final String UUID_NODE = "UUID_NODE";
 	public static final String RANDOM_STRING_NODE = "RANDOM_STRING_NODE";
+	public static final String HASH_GENERATOR_NODE = "HASH_GENERATOR_NODE";
 	
 	private String nodeId;
 	private String nodeName;

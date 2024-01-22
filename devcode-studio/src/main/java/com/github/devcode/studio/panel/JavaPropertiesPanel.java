@@ -3,20 +3,25 @@ package com.github.devcode.studio.panel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -34,6 +39,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -99,7 +106,7 @@ public class JavaPropertiesPanel extends JPanel{
 		int width0 = Math.round(tablePreferredSize.width * 0.1f);
 		int width1 = Math.round(tablePreferredSize.width * 0.3f);
 		int width2 = Math.round(tablePreferredSize.width * 0.6f);
-		logger.info("TableSize : " + tablePreferredSize + ", width : " + width0 + ", " + width1 + ", " + width2);
+		logger.info("TableWidthSize : {}, {}, {}", width0, width1, width2);
 		
 		columnModel.getColumn(0).setPreferredWidth(width0);
 		columnModel.getColumn(0).setMinWidth(width0);
@@ -282,6 +289,37 @@ public class JavaPropertiesPanel extends JPanel{
 		leftPanel.add(toolBar);
 		
 		JPanel rightPanel = new JPanel(new BorderLayout());
+		JPanel rightFlowPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		
+		// 복사 버튼
+		FlatButton copyButton = new FlatButton();
+		copyButton.setIcon(new FlatSVGIcon("com/github/devcode/studio/icons/copy.svg"));
+		copyButton.setToolTipText("복사");
+		copyButton.setButtonType(ButtonType.toolBarButton);
+		copyButton.setHorizontalAlignment(SwingConstants.RIGHT);
+		copyButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				copyJavaProp();
+			}
+		});
+		rightFlowPanel.add(copyButton);
+		
+		// 다운로드 버튼
+		FlatButton downloadButton = new FlatButton();
+		downloadButton.setIcon(new FlatSVGIcon("com/github/devcode/studio/icons/download.svg"));
+		downloadButton.setToolTipText("다운로드");
+		downloadButton.setButtonType(ButtonType.toolBarButton);
+		downloadButton.setHorizontalAlignment(SwingConstants.RIGHT);
+		downloadButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				downloadJavaPropTextFile();
+			}
+		});
+		rightFlowPanel.add(downloadButton);
+		
+		// 리로드 버튼
 		FlatButton reloadButton = new FlatButton();
 		reloadButton.setIcon(new FlatSVGIcon("com/github/devcode/studio/icons/refresh.svg"));
 		reloadButton.setToolTipText("새로고침");
@@ -293,10 +331,14 @@ public class JavaPropertiesPanel extends JPanel{
 				javaPropLoad();
 			}
 		});
-		rightPanel.add(reloadButton, BorderLayout.EAST);
+		rightFlowPanel.add(reloadButton);
+		
+		
+		
+		rightPanel.add(rightFlowPanel, BorderLayout.EAST);
 		
 		JPanel infoPanel = new JPanel(new GridLayout(1, 2));
-		infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		//infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		infoPanel.add(leftPanel, BorderLayout.WEST);
 		infoPanel.add(rightPanel, BorderLayout.EAST);
 		
@@ -379,6 +421,132 @@ public class JavaPropertiesPanel extends JPanel{
 		
 		String inform = propTreeMap.size() + " 건, " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		informLabel.setText(inform);
+	}
+	
+	/**
+	 * 자바프로퍼티 테이블을 문자열로 변환
+	 * 
+	 * @return
+	 */
+	private String javaPropToString() {
+		DefaultTableModel model = (DefaultTableModel)table.getModel();
+		
+		if(model.getRowCount() == 0) {
+			return "";
+		}
+		
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("No\tKey\tValue").append(System.lineSeparator());
+		
+		for(int i=0; i<model.getRowCount(); i++) {
+			Object noObj = model.getValueAt(i, 0);
+			Object keyObj = model.getValueAt(i, 1);
+			Object valueObj = model.getValueAt(i, 2);
+			
+			Integer no = noObj != null ? (Integer)noObj : null;
+			String key = keyObj != null ? (String)keyObj : "";
+			String value = valueObj != null ? (String)valueObj : "";
+			
+			builder.append(no).append("\t");
+			builder.append(key).append("\t");
+			builder.append(value).append(System.lineSeparator());
+		}
+		
+		return builder.toString();
+	}
+	
+	/**
+	 * 텍스트파일 다운로드
+	 */
+	private void downloadJavaPropTextFile() {
+		try {
+			String javaPropString = javaPropToString();
+			
+			if(StringUtils.isBlank(javaPropString)) {
+				JOptionPane.showMessageDialog(getRootPane(), "다운로드 데이터가 존재하지 않습니다.", "확인", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			
+			String textFileName = "JavaProperties_"+DateFormatUtils.format(new Date(), "yyyyMMddHHmmss")+".txt";
+			
+			JFileChooser fileChooser = new JFileChooser();
+			
+			// TODO : 최종저장 선택폴더 불러오기(Properties 또는 H2 DB)
+			fileChooser.setSelectedFile(new File(FileUtils.getUserDirectoryPath() + File.separator + textFileName));
+			
+			int showSaveDialog = fileChooser.showSaveDialog(this);
+			if(showSaveDialog == JFileChooser.APPROVE_OPTION) {
+				File currentDirectory = fileChooser.getCurrentDirectory();  // 현재 선택한 폴더
+				File selectedFile = fileChooser.getSelectedFile();          // 선택/입력한 파일경로(파일명포함)
+				String selectedInputFileName = selectedFile.getName();
+				logger.info("현재폴더 : {}, 선택/입력한 파일 : {}, 선택/입력한 파일명 : {}", currentDirectory.toString(), selectedFile.toString(), selectedInputFileName);
+				
+				// 파일이 존재하는지 확인(폴더만 선택되게끔 설정되어 있으면 미사용)
+				if(selectedFile.exists() && selectedFile.isFile()) {
+					int showConfirmDialog = JOptionPane.showConfirmDialog(getRootPane(), "파일이 존재합니다. 덮어씌우시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
+					if(showConfirmDialog == JOptionPane.NO_OPTION) {
+						return;
+					}
+					
+					logger.info("덮어씌우기 옵션 YES. 파일삭제 : {}", selectedFile.toString());
+					if(selectedFile.exists()) {
+						if(selectedFile.delete()) {
+							logger.info("덮어씌우기 옵션 YES. 파일삭제성공 : {}", selectedFile.toString());
+						}
+					}
+				}
+				
+				logger.info("저장하기 파일 : {}", selectedFile.toString());
+				
+				String textFilePath = FilenameUtils.normalizeNoEndSeparator(FileUtils.getTempDirectoryPath()) + File.separator + textFileName;
+				File textFile = new File(textFilePath);
+				
+				FileUtils.writeStringToFile(textFile, javaPropString, "UTF-8");
+				logger.info("TextFilePath 생성완료 - {}, FileSize : {}", textFilePath, FileUtils.byteCountToDisplaySize(textFile.length()));
+				
+				// 선택한 폴더가 존재하지 않습니다.
+				if(!currentDirectory.exists()) {
+					JOptionPane.showMessageDialog(getRootPane(), "선택한 폴더가 존재하지 않습니다.", "확인", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				
+				// 파일 이동
+				FileUtils.moveFile(textFile, selectedFile);
+				
+				// 파일이동완료
+				logger.info("파일이동완료. SourceFile - {}, TargetFile = {}", textFile.toString(), selectedFile.toString());
+				
+				JOptionPane.showMessageDialog(getRootPane(), "파일저장성공("+selectedFile.toString()+")", "확인", JOptionPane.INFORMATION_MESSAGE);
+			}
+			
+		} catch (IOException e) {
+			logger.error("ERROR", e);
+		}
+	}
+	
+	/**
+	 * 클립보드 복사
+	 */
+	private void copyJavaProp() {
+		try {
+			String javaPropString = javaPropToString();
+			
+			if(StringUtils.isBlank(javaPropString)) {
+				JOptionPane.showMessageDialog(getRootPane(), "복사할 데이터가 존재하지 않습니다.", "확인", JOptionPane.WARNING_MESSAGE);
+				return;
+			}
+			
+			StringSelection stringSelection = new StringSelection(javaPropString);
+			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			clipboard.setContents(stringSelection, stringSelection);
+			
+			JOptionPane.showMessageDialog(getRootPane(), "복사가 완료되었습니다.", "확인", JOptionPane.INFORMATION_MESSAGE);
+			logger.info("클립보드 복사완료. JavaPropStringLength : {}", javaPropString.length());
+			
+		} catch (Exception e) {
+			logger.error("ERROR", e);
+		}
 	}
 
 }

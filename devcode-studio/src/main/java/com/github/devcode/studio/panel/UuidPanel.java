@@ -14,12 +14,14 @@ import java.util.UUID;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -90,9 +92,26 @@ public class UuidPanel extends JPanel {
 		createUuidButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createUuidButton.setEnabled(false);
-				setCreateUuidTextArea();
-				createUuidButton.setEnabled(true);
+				// 비동기 실행
+				SwingUtilities.invokeLater(new Runnable() {
+	                public void run() {
+	    				setCreateUuidTextArea();
+	                }
+	            });
+				
+//				try {
+//					SwingUtilities.invokeAndWait(new Runnable() {
+//					    public void run() {
+//							setCreateUuidTextArea();
+//					    }
+//					});
+//				} catch (InvocationTargetException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (InterruptedException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
 			}
 		});
 		buttonGroupPanel.add(createUuidButton);
@@ -119,30 +138,39 @@ public class UuidPanel extends JPanel {
 	 * UUID 생성 후 uuidTextArea 값지정
 	 */
 	private void setCreateUuidTextArea() {
-		String createCountValue = createCountSpinner.getValue().toString();
-		int uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
+		createUuidButton.setEnabled(false);
 		
-		if(StringUtils.isNotBlank(createCountValue) && StringUtils.isNumeric(createCountValue)) {
-			uuidCreateCount = Integer.parseInt(createCountValue);
-			if(uuidCreateCount < 0 && uuidCreateCount > 100) {
-				uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
-			}
-		}
-		
-		if(uuidCreateCount > 0) {
-			StringBuilder sb = new StringBuilder();
-			for(int i=0; i<uuidCreateCount; i++) {
-				if(i > 0) {
-					sb.append(System.lineSeparator());
-				}
-				
-				sb.append(UUID.randomUUID().toString().toUpperCase());
-			}
-		
-			logger.info("UUID {}개 생성", uuidCreateCount);
+		try {
+			String createCountValue = createCountSpinner.getValue().toString();
+			int uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
 			
-			uuidTextArea.setText(sb.toString());
-			statusInformLabel.setText(uuidCreateCount + "개의 UUID 생성완료. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			if(StringUtils.isNotBlank(createCountValue) && StringUtils.isNumeric(createCountValue)) {
+				uuidCreateCount = Integer.parseInt(createCountValue);
+				if(uuidCreateCount < 0 && uuidCreateCount > 100) {
+					uuidCreateCount = UUID_CREATE_DEFAULT_VALUE;
+				}
+			}
+			
+			if(uuidCreateCount > 0) {
+				StringBuilder sb = new StringBuilder();
+				for(int i=0; i<uuidCreateCount; i++) {
+					if(i > 0) {
+						sb.append(System.lineSeparator());
+					}
+					
+					sb.append(UUID.randomUUID().toString().toUpperCase());
+				}
+			
+				logger.info("UUID {}개 생성", uuidCreateCount);
+				
+				uuidTextArea.setText(sb.toString());
+				statusInformLabel.setText(uuidCreateCount + "개의 UUID 생성완료. " + DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+			}
+		}catch(Exception e) {
+			logger.error("ERROR", e);
+			JOptionPane.showMessageDialog(getRootPane(), e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+		}finally {
+			createUuidButton.setEnabled(true);
 		}
 	}
 	

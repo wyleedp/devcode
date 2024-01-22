@@ -52,6 +52,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.github.devcode.studio.component.AppTreeNode;
+import com.github.devcode.studio.panel.HashGeneratorPanel;
 import com.github.devcode.studio.panel.JavaPropertiesPanel;
 import com.github.devcode.studio.panel.OsEnvPanel;
 import com.github.devcode.studio.panel.RandomStringPanel;
@@ -337,10 +338,14 @@ public class DevcodeStudioLauncher extends JFrame {
 		DefaultMutableTreeNode randomStringNode = new DefaultMutableTreeNode("Random String");
 		randomStringNode.setUserObject(new AppTreeNode(AppTreeNode.RANDOM_STRING_NODE, "Random String"));
 		
+		DefaultMutableTreeNode hashGeneratorNode = new DefaultMutableTreeNode("Hash Generator");
+		hashGeneratorNode.setUserObject(new AppTreeNode(AppTreeNode.HASH_GENERATOR_NODE, "Hash Generator"));
+		
 		devTooltreeNode.add(javaPropertiesTreeNode);
 		devTooltreeNode.add(osEnvTreeNode);
 		devTooltreeNode.add(uuidNode);
 		devTooltreeNode.add(randomStringNode);
+		devTooltreeNode.add(hashGeneratorNode);
 		
 		JTree devTooltree = new JTree(devTooltreeNode);
 		devTooltree.addMouseListener(new MouseAdapter() {
@@ -414,6 +419,9 @@ public class DevcodeStudioLauncher extends JFrame {
 			setTabFocus();
 		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.RANDOM_STRING_NODE)) {
 			bodyTabPane.addTab(nodeName, new RandomStringPanel());
+			setTabFocus();
+		}else if(StringUtils.equalsAnyIgnoreCase(nodeId, AppTreeNode.HASH_GENERATOR_NODE)) {
+			bodyTabPane.addTab(nodeName, new HashGeneratorPanel());
 			setTabFocus();
 		}
 	}
